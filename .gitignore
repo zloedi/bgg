@@ -8,4 +8,5 @@ zhost
 tags
 Debug/
 Release/
+Profile/
 Makefile
