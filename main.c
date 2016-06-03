@@ -10,6 +10,7 @@ static void X_Init_f( void ) {
 }
 
 static void X_Frame_f( const utFrameParams_t *params ) {
+    R_ColorC( colWhite );
     R_DrawPicV2( params->cursorPosition, v2xy( 20, 20 ), v2zero, v2one, x_cp437Texture );
 }
 
