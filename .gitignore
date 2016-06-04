@@ -3,8 +3,8 @@
 *.exe
 *.dll
 vim_session_*
-zhost_dbg
-zhost
+bgg_dbg
+bgg
 tags
 Debug/
 Release/
