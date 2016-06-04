@@ -6,13 +6,13 @@ static void X_RegisterVars_f( void ) {
 }
 
 static void X_Init_f( void ) {
+    //x_cp437Texture = R_LoadTexture( "rexpaint_cp437_10x10.png" );
     x_cp437Texture = R_LoadTexture( "cp437_12x12.png" );
 }
 
 static void X_Frame_f( const utFrameParams_t *params ) {
-    R_ColorC( colWhite );
-    R_DrawPicV2( params->cursorPosition, v2xy( 20, 20 ), v2zero, v2one, x_cp437Texture );
-    //CON_Printf( "time delta: %d\n", params->timeDelta );
+    R_ColorC( colCyan );
+    R_DrawPicV2( params->cursorPosition, v2xy( 192 * 2, 192 * 2 ), v2zero, v2one, x_cp437Texture );
 }
 
 static void X_Done_f( void ) {
