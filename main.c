@@ -27,9 +27,10 @@ static void X_Init_f( void ) {
     if ( w != h ) {
         CON_Printf( "X_Init_f: non-square code page 437 texture. Using fallback texture instead.\n" );
         x_cp437Texture = r_fallbackTexture;
-        w = 1;
+        x_cp437TextureWidth = 1;
+    } else {
+        x_cp437TextureWidth = w;
     }
-    x_cp437TextureWidth = w;
 }
 
 static void X_Frame_f( const utFrameParams_t *params ) {
