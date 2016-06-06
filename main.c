@@ -4,18 +4,14 @@ static rImage_t *x_cp437Texture;
 static float    x_cp437TextureWidth;
 
 static void X_DrawCursor( v2_t position ) {
-    float curDim = x_cp437TextureWidth / 16. * Maxi( R_GetWindowSize().y / 512, 1 );
+    float curDim = x_cp437TextureWidth / 16.;
     v2_t size = v2xy( curDim, curDim );
     v2_t st0 = v2xy( 10 / 16., 13 / 16. );
     v2_t st1 = v2xy( 11 / 16., 14 / 16. );
     v2_t origin = v2Sub( position, v2Scale( size, 0.5 ) );
     R_DrawPicV2( origin, size, st0, st1, x_cp437Texture );
-    R_DrawPicV2( 
-            v2Add( origin, v2Scale( size, 0.25 ) ), 
-            size, 
-            st0, 
-            st1, 
-            x_cp437Texture );
+    R_DrawPicV2( v2Add( origin, v2Scale( size, 0.25 ) ), size, st0, st1, x_cp437Texture );
+    R_DrawPicV2( v2Add( origin, v2Scale( size, 0.5 ) ), size, st0, st1, x_cp437Texture );
 }
 
 static void X_RegisterVars_f( void ) {
