@@ -27,22 +27,19 @@ static void X_Init_f( void ) {
     } else {
         x_cp437TextureWidth = w;
     }
+    R_ShowCursor( false );
 }
 
-static void X_Frame_f( const utFrameParams_t *params ) {
+static void X_Frame_f( void ) {
     R_ColorC( colCyan );
-    X_DrawCursor( params->cursorPosition );
+    X_DrawCursor( I_GetMousePosition() );
 }
 
 static void X_Done_f( void ) {
 }
 
 int main( int argc, char *argv[] ) {
-    UT_RunApp( NULL, 
-               "bgg",
-               "Bullets, Grit, Gasoline",
-               false,
-               colorrgb( 0.1f, 0.1f, 0.1f ),
+    UT_RunApp( "bgg",
                X_RegisterVars_f,
                X_Init_f,
                X_Frame_f,
