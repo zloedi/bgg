@@ -38,6 +38,13 @@ static void X_Frame_f( void ) {
 static void X_Done_f( void ) {
 }
 
+void RasterizeFOVOctant( int originX, int originY,
+                         int radius, 
+                         int bitmapWidth, int bitmapHeight,
+                         int octant,
+                         const unsigned char *inTerrain, 
+                         unsigned char *outBitmap );
+
 int main( int argc, char *argv[] ) {
     UT_RunApp( "bgg",
                X_RegisterVars_f,
