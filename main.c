@@ -53,9 +53,19 @@ static void X_DrawCursor( rImage_t *texture, v2_t texSize, v2_t position ) {
     v2_t st0 = v2xy( 10 / 16., 13 / 16. );
     v2_t st1 = v2xy( 11 / 16., 14 / 16. );
     v2_t origin = v2Sub( position, v2Scale( size, 0.5 ) );
-    R_DrawPicV2( origin, size, st0, st1, x_cp437Texture );
-    R_DrawPicV2( v2Add( origin, v2Scale( size, 0.25 ) ), size, st0, st1, x_cp437Texture );
-    R_DrawPicV2( v2Add( origin, v2Scale( size, 0.5 ) ), size, st0, st1, x_cp437Texture );
+    v2_t origins[3] = {
+        origin,
+        v2Add( origin, v2Scale( size, 0.25 ) ),
+        v2Add( origin, v2Scale( size, 0.5 ) ),
+    };
+    R_Color( 0, 0, 0, 0.5 );
+    for ( int i = 0; i < 3; i++ ) {
+        R_DrawPicV2( v2Sub( origins[i], v2xy( 1, 1 ) ), size, st0, st1, x_cp437Texture );
+    }
+    R_ColorC( colCyan );
+    for ( int i = 0; i < 3; i++ ) {
+        R_DrawPicV2( origins[i], size, st0, st1, x_cp437Texture );
+    }
 }
 
 static void X_RegisterVars_f( void ) {
@@ -89,10 +99,10 @@ static void X_Frame_f( void ) {
     memset( x_view.bits, 0, sizeof( *x_view.bits ) * x_view.size.x * x_view.size.y );
     // draw the textures before rasterizing
     // so we can draw debug stuff in the raster routine
-    R_ColorC( colGreen );
+    R_ColorC( colorScaleRGB( colGreen, 0.1f ) );
     R_DrawPic( 0, 0, x_maze.size.x * scale, windowSize.y, 0, 0, 1, 1, x_maze.image );
-    R_ColorC( colWhite );
-    R_DrawPic( 0, 0, x_view.size.x * scale, windowSize.y, 0, 0, 1, 1, x_view.image );
+    //R_ColorC( colWhite );
+    //R_DrawPic( 0, 0, x_view.size.x * scale, windowSize.y, 0, 0, 1, 1, x_view.image );
     for ( int i = 0; i < 8; i++ ) {
         RasterizeFOVOctant( origin.x, origin.y,
                             Clampf( VAR_Num( x_losRadius ), 0, 1024 ), 
@@ -101,7 +111,6 @@ static void X_Frame_f( void ) {
                             x_maze.bits, x_view.bits );
     }
     R_BlitToTexture( x_view.image, x_view.bits, x_view.size.x, x_view.size.y, 1 );
-    R_ColorC( colCyan );
     X_DrawCursor( x_cp437Texture, x_cp437TextureSize, mouse );
 }
 
