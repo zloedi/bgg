@@ -22,11 +22,12 @@ void RasterizeFOVOctant( int originX, int originY,
                          unsigned char *outBitmap );
 
 void GenerateTestMaze( c2_t mazeSize, byte *maze ) {
+
     int sz = mazeSize.x * mazeSize.y;
     memset( maze, 0, sz );
 
     int numPixels = sz / 100;
-    int numRects = sz / 50;
+    int numRects = sz / 25;
     int minRectSide = Mini( mazeSize.x, mazeSize.y ) / 64;
     int maxRectSide = minRectSide * 8;
 
@@ -75,9 +76,9 @@ static void X_RegisterVars_f( void ) {
 }
 
 static void X_Init_f( void ) {
-    x_cp437Texture = R_LoadTextureEx( "cp437_12x12.png", &x_cp437TextureSize );
-    x_maze.image = R_BlankTexture();
-    x_view.image = R_BlankTexture();
+    x_cp437Texture = R_LoadStaticTextureEx( "cp437_12x12.png", &x_cp437TextureSize );
+    x_maze.image = R_BlankStaticTexture();
+    x_view.image = R_BlankStaticTexture();
     R_ShowCursor( false );
 }
 
@@ -89,20 +90,20 @@ static void X_Frame_f( void ) {
         x_maze.bits = A_Realloc( x_maze.bits, sz * sizeof( *x_maze.bits ) );
         x_view.bits = A_Realloc( x_view.bits, sz * sizeof( *x_view.bits ) );
         GenerateTestMaze( x_maze.size, x_maze.bits );
-        R_BlitToTexture( x_maze.image, x_maze.bits, x_maze.size.x, x_maze.size.y, 1 );
-        CON_Printf( "changed size of the maze to %d,%d", x_maze.size.x, x_maze.size.y );
+        R_BlitToTexture( x_maze.image, x_maze.bits, x_maze.size, 1 );
+        CON_Printf( "Changed size of the maze to %d,%d\n", x_maze.size.x, x_maze.size.y );
     }
     v2_t windowSize = R_GetWindowSize();
     float scale = windowSize.y / ( float )x_maze.size.y;
     v2_t mouse = I_GetMousePosition();
-    v2_t origin = v2xy( mouse.x / scale, mouse.y / scale );
+    v2_t origin = v2Scale( mouse, 1 / scale );
     memset( x_view.bits, 0, sizeof( *x_view.bits ) * x_view.size.x * x_view.size.y );
     // draw the textures before rasterizing
     // so we can draw debug stuff in the raster routine
-    R_ColorC( colorScaleRGB( colGreen, 0.1f ) );
+    R_ColorC( colorScaleRGB( colGreen, 0.5f ) );
     R_DrawPic( 0, 0, x_maze.size.x * scale, windowSize.y, 0, 0, 1, 1, x_maze.image );
-    //R_ColorC( colWhite );
-    //R_DrawPic( 0, 0, x_view.size.x * scale, windowSize.y, 0, 0, 1, 1, x_view.image );
+    R_ColorC( colWhite );
+    R_DrawPic( 0, 0, x_view.size.x * scale, windowSize.y, 0, 0, 1, 1, x_view.image );
     for ( int i = 0; i < 8; i++ ) {
         RasterizeFOVOctant( origin.x, origin.y,
                             Clampf( VAR_Num( x_losRadius ), 0, 1024 ), 
@@ -110,7 +111,7 @@ static void X_Frame_f( void ) {
                             i,
                             x_maze.bits, x_view.bits );
     }
-    R_BlitToTexture( x_view.image, x_view.bits, x_view.size.x, x_view.size.y, 1 );
+    R_BlitToTexture( x_view.image, x_view.bits, x_view.size, 1 );
     X_DrawCursor( x_cp437Texture, x_cp437TextureSize, mouse );
 }
 
