@@ -55,6 +55,9 @@ static inline int Clampi( int v, int min, int max ) {
 	return Maxi( min, Mini( v, max ) );
 }
 
+// doesnt step on pixel centers.
+// origin pixel can be read out of bitmap if on edge. related to previous.
+// doesnt work on non-square maze: 128x256.
 void RasterizeFOVOctant( int originX, int originY,
                          int radius, 
                          int bitmapWidth, int bitmapHeight,
