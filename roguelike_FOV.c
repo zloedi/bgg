@@ -3,270 +3,233 @@
       Rasterizes a single Field Of View octant on a grid, similar to the way 
       FOV / shadowcasting is implemented in some roguelikes.
       Clips to bitmap
-
-   What it DOES NOT do:
-      Subpixel accuracy
-      Antialiasing
+      Steps on pixel centers
+      Optional attenuation
+      Optional circle clip
+      Optional lit blocking tiles
 
    To rasterize the entire FOV, call this in a loop with octant in range 0-7
    Inspired by http://blogs.msdn.com/b/ericlippert/archive/2011/12/12/shadowcasting-in-c-part-one.aspx
 
    See the result here: 
       http://youtu.be/O8xxVQ1fcTE
-      http://imgur.com/l2c2Mi4&Wyo46ps&DhkCQXD
-      http://imgur.com/l2c2Mi4&Wyo46ps&DhkCQXD#1
-      http://imgur.com/l2c2Mi4&Wyo46ps&DhkCQXD#2
 */
 
-typedef struct {
-    int x, y;
-} c2_t;
+#include "zhost.h"
 
-static inline c2_t c2xy( int x, int y ) {
-    c2_t c = { x, y };
-    return c;
-}
-
-static inline c2_t c2Add( c2_t a, c2_t b ) {
-    return c2xy( a.x + b.x, a.y + b.y );
-}
-
-static inline c2_t c2Sub( c2_t a, c2_t b ) {
-    return c2xy( a.x - b.x, a.y - b.y );
-}
-
-static inline int c2Dot( c2_t a, c2_t b ) {
-    return a.x * b.x + a.y * b.y;
-}
-
-static inline int c2CrossC( c2_t a, c2_t b ) {
-    return a.x * b.y - a.y * b.x;
-}
-
-static inline int Maxi( int a, int b ) {
-    return a > b ? a : b;
-}
-
-static inline int Mini( int a, int b ) {
-    return a < b ? a : b;
-}
-
-static inline int Clampi( int v, int min, int max ) {
-	return Maxi( min, Mini( v, max ) );
-}
-
-// doesnt step on pixel centers.
-// origin pixel can be read out of bitmap if on edge. related to previous.
-// doesnt work on non-square maze: 128x256.
 void RasterizeFOVOctant( int originX, int originY,
                          int radius, 
                          int bitmapWidth, int bitmapHeight,
                          int octant,
-                         const unsigned char *inTerrain, 
+                         int skipAttenuation,
+                         int skipClampToRadius,
+                         int darkWalls,
+                         const unsigned char *inBitmap, 
                          unsigned char *outBitmap ) {
-
-#define READ_PIXEL(c) inTerrain[(c).x+(c).y*bitmapWidth]
+#define READ_PIXEL(c) inBitmap[(c).x+(c).y*bitmapWidth]
 #define WRITE_PIXEL(c,color) outBitmap[(c).x+(c).y*bitmapWidth]=(color)
-#define FALSE 0
-#define TRUE 1
-#define MAX_FRUST_RAYS 32
-
-    c2_t origin = c2xy( originX, originY );
+#define MAX_RAYS 64
+#define ADD_RAY(c) {nextRays->rays[Mini(nextRays->numRays,MAX_RAYS-1)] = (c);nextRays->numRays++;}
+#define IS_ON_MAP(c) ((c).x >= 0 && (c).x < bitmapWidth && (c).y >= 0 && (c).y < bitmapHeight)
+    typedef struct {
+        int numRays;
+        c2_t rays[MAX_RAYS];
+    } raysList_t;
+    // keep these coupled like this
+    static const const c2_t bases[] = {
+        { { 1, 0  } }, { { 0, 1  } },
+        { { 1, 0  } }, { { 0, -1 } },
+        { { -1, 0 } }, { { 0, -1 } },
+        { { -1, 0 } }, { { 0, 1  } },
+        { { 0, 1  } }, { { -1, 0 } },
+        { { 0, 1  } }, { { 1, 0  } },
+        { { 0, -1 } }, { { 1, 0  } },
+        { { 0, -1 } }, { { -1, 0 } },
+    }; 
+    c2_t e0 = bases[( octant * 2 + 0 ) & 15];
+    c2_t e1 = bases[( octant * 2 + 1 ) & 15];
+    raysList_t rayLists[2] = { {
+        .numRays = 2,
+        .rays = {
+            c2xy( 1, 0 ),
+            c2xy( 1, 1 ),
+        }, 
+    } };
     c2_t bitmapSize = c2xy( bitmapWidth, bitmapHeight );
-
-    // quit if on blocking tile
+    c2_t bitmapMax = c2Sub( bitmapSize, c2one );
+    c2_t origin = c2Clamp( c2xy( originX, originY ), c2zero, bitmapMax );
     if ( READ_PIXEL( origin ) ) {
+        WRITE_PIXEL( origin, 255 );
         return;
     }
+    c2_t dmin = c2Neg( origin );
+    c2_t dmax = c2Sub( bitmapMax, origin );
+    int dmin0 = c2Dot( dmin, e0 );
+    int dmax0 = c2Dot( dmax, e0 );
+    int limit0 = Mini( radius, dmin0 > 0 ? dmin0 : dmax0 );
+    int dmin1 = c2Dot( dmin, e1 );
+    int dmax1 = c2Dot( dmax, e1 );
+    int limit1 = Mini( radius, dmin1 > 0 ? dmin1 : dmax1 );
+    c2_t ci = origin;
+    for ( int i = 0; i <= limit0; i++ ) {
+        int i2 = i * 2;
+        raysList_t *currRays = &rayLists[( i + 0 ) & 1];
+        raysList_t *nextRays = &rayLists[( i + 1 ) & 1];
+        nextRays->numRays = 0;
+        for ( int r = 0; r < currRays->numRays - 1; r += 2 ) {
+            c2_t r0 = currRays->rays[r + 0];
+            c2_t r1 = currRays->rays[r + 1];
+            int inyr0 = ( i2 - 1 ) * r0.y / r0.x;
+            int outyr0 = ( i2 + 1 ) * r0.y / r0.x;
+            int inyr1 = ( i2 - 1 ) * r1.y / r1.x;
+            int outyr1 = ( i2 + 1 ) * r1.y / r1.x;
 
-    origin.x = Clampi( origin.x, 0, bitmapSize.x - 1 );
-    origin.y = Clampi( origin.y, 0, bitmapSize.y - 1 );
+            // every pixel with a center INSIDE the frustum is lit
 
-    // generate octant transform matrix
-    int lx = octant & 1;
-    int ly = ( octant + 1 ) & 1;
-    int sx = 1 - ( ( octant & 4 ) >> 1 );
-    int sy = 1 - ( ( ( octant + 2 ) & 4 ) >> 1 );
-    c2_t e0 = c2xy( lx * sx, ly * sx );
-    c2_t e1 = c2xy( ly * sy, lx * sy );
-
-    // get clipping distances in local space by projecting minmax on the transform axes
-    // apply bias when rasterizing to the "left"
-    c2_t v = c2Sub( origin, bitmapSize );
-    int dx0 = c2Dot( origin, e0 ); 
-    int dx1 = c2Dot( v, e0 ); 
-    int biasX = dx0 < 0;
-    int dx = Maxi( dx0, dx1 ) - biasX;
-    int dy0 = c2Dot( origin, e1 ); 
-    int dy1 = c2Dot( v, e1 ); 
-    int biasY = dy0 < 0;
-    int dy = Maxi( dy0, dy1 ) - biasY;
-
-    int maxX = Mini( radius, bitmapSize.x - dx );
-
-    typedef struct {
-        c2_t v;
-        int w;
-    } frustRay_t;
-
-    // rays are ordered in pairs forming frustums
-    // the initial frustum contains the entire octant
-    int numFrust = 2;
-    frustRay_t frust[MAX_FRUST_RAYS] = { 
-        { c2xy( 1, 0 ), 0, },
-        { c2xy( 1, 1 ), 0, },
-    };
-
-    int r2 = radius * radius;
-
-    c2_t local;
-    for ( local.x = 0; local.x < maxX; ) {
-
-        // y moves down diagonally
-        int maxY = Mini( local.x + 1, bitmapSize.y - dy );
-
-        // keep the Y of first blocking pixel and use it to correct the lower frustum vector
-        int entryY = maxY;
-
-        for ( local.y = 0; local.y < maxY; ) {
-            int d2 = c2Dot( local, local );
-
-            if ( d2 <= r2 ) {
-
-                // world space transform tile
-                c2_t p = c2xy( e0.x * local.x + e1.x * local.y + origin.x,
-                               e0.y * local.x + e1.y * local.y + origin.y );
-
-                int isBlockingLight = READ_PIXEL( p );
-
-                if ( isBlockingLight ) {
-
-                    // obstructing tiles hit by frustum rays cause angle between rays to shrink by pushing them accordingly
-                    // new frustum is created around tile if it is not penetrated by any rays and is contained in an existing frustum
-
-                    const c2_t verts[2] = {
-                        c2xy( local.x, local.y + 1 ),
-                        c2xy( local.x + 1, local.y ),
-                    };
-
-                    if ( local.y < entryY ) {
-                        entryY = local.y;
-                    }
-
-                    int hitByRay = FALSE;
-
-                    for ( int i = 0; i < numFrust; i++ ) {
-                        frustRay_t *fr = &frust[i];
-
-                        // handle the case where ray (1,0) hits blocking tile (x,0) explicitly
-                        if ( fr->v.y == 0 && local.y == 0 ) {
-                            fr->v = c2xy( local.x, 1 );
-                            fr->w = c2CrossC( fr->v, local );
-                            continue;
-                        }
-
-                        // ignore x + 1, y + 1 because in this octant ray always comes from up left
-                        int w0 = c2CrossC( fr->v, verts[0] );
-                        int w1 = c2CrossC( fr->v, verts[1] );
-                        int w2 = fr->w;
-
-                        // if signs differ, the ray intersects the tile
-                        if ( ( ( w0 ^ w1 ) | ( w0 ^ w2 ) ) < 0 ) {
-                            // correct the ray
-
-                            // top rays sink, bottom rays bubble up
-                            if ( i & 1 ) {
-                                fr->v = c2xy( local.x + 1, entryY );
-                            } else {
-                                fr->v = c2xy( local.x, local.y + 1 );
-                            }
-
-                            fr->w = c2CrossC( fr->v, local );
-
-                            hitByRay = TRUE;
-                        }
-                    }
-
-                    if ( ! hitByRay && numFrust < MAX_FRUST_RAYS ) {
-
-                        // create new frustum by splitting the one that contains the tile
-
-                        for ( int i = 0; i < numFrust; i += 2 ) {
-                            frustRay_t *upper = &frust[i + 0];
-                            frustRay_t *lower = &frust[i + 1];
-
-                            int w0 =  upper->w;
-                            int w1 = -lower->w;
-
-                            // check if tile is on or "inside" both edges
-                            if ( ( w0 | w1 ) >= 0 ) {
-
-                                // insert frustum rays around light blocking tile(s)
-
-                                frust[numFrust + 1] = *lower;
-
-                                frustRay_t *fr1 = lower;
-                                frustRay_t *fr2 = &frust[numFrust];
-
-                                fr1->v = c2xy( local.x + 1, local.y );
-                                fr2->v = c2xy( local.x, entryY + 1 );
-
-                                numFrust += 2;
-
-                                // ignore other frustums
-                                break;
-                            }
-                        }
-                    }
-                } 
-
-                else {
-
-                    // non blocking tile
-
-                    for ( int i = 0; i < numFrust; i += 2 ) {
-                        frustRay_t *upper = &frust[i + 0];
-                        frustRay_t *lower = &frust[i + 1];
-
-                        int w0 =  upper->w;
-                        int w1 = -lower->w;
-
-                        // check if tile is on or "inside" both edges
-                        if ( ( w0 | w1 ) >= 0 ) {
-
-                            // light up the tile
-
-                            // uncomment this for attenuation
-                            //WRITE_PIXEL( p, 255 - d2 * 255 / r2 );
-
-                            WRITE_PIXEL( p, 255 );
-
-                            // ignore other frustums
-                            break;
-                        }
-                    }
-
-                    // reset blocking span of tiles 
-                    entryY = maxY;
+            int starty = outyr0 + 1;
+            if ( c2CrossC( r0, c2xy( i2, outyr0 ) ) < 0 ) {
+                starty++;
+            }
+            starty /= 2;
+            c2_t start = c2Add( ci, c2Scale( e1, starty ) );
+            int endy = inyr1 + 1;
+            if ( c2CrossC( r1, c2xy( i2, inyr1 + 1 ) ) > 0 ) {
+                endy--;
+            }
+            endy /= 2;
+            //c2_t end = c2Add( ci, c2Scale( e1, endy ) );
+            {
+                int y;
+                c2_t p;
+                int miny = starty;
+                int maxy = Mini( endy, limit1 ); 
+                for ( y = miny, p = start; y <= maxy; y++, p = c2Add( p, e1 ) ) {
+                    WRITE_PIXEL( p, 255 );
                 }
             }
 
-            local.y++;
+            // push rays for the next column
 
-            // no need to do cross product here, just interpolate
-            for ( int i = 0; i < numFrust; i++ ) {
-                frustRay_t *fr = &frust[i];
-                fr->w += fr->v.x;
+            // correct the bounds first
+
+            c2_t bounds0;
+            c2_t bounds1;
+            c2_t firstin = c2Add( ci, c2Scale( e1, ( inyr0 + 1 ) / 2 ) );
+            c2_t firstout = c2Add( ci, c2Scale( e1, ( outyr0 + 1 ) / 2 ) );
+            if ( ( IS_ON_MAP( firstin ) && ! READ_PIXEL( firstin ) )
+                && ( IS_ON_MAP( firstout ) && ! READ_PIXEL( firstout ) ) ) {
+                  bounds0 = r0;
+            } else {
+                int top = ( outyr0 + 1 ) / 2;
+                int bottom = Mini( ( inyr1 + 1 ) / 2, limit1 );
+                int y;
+                c2_t p = c2Add( ci, c2Scale( e1, top ) );
+                for ( y = top * 2; y <= bottom * 2; y += 2, p = c2Add( p, e1 ) ) {
+                    if ( ! READ_PIXEL( p ) ) {
+                        break;
+                    }
+                    // pixels that force ray corrections are lit too
+                    WRITE_PIXEL( p, 255 );
+                }
+                bounds0 = c2xy( i2 - 1, y - 1 );
+                inyr0 = ( i2 - 1 ) * bounds0.y / bounds0.x;
+                outyr0 = ( i2 + 1 ) * bounds0.y / bounds0.x;
+            }
+            c2_t lastin = c2Add( ci, c2Scale( e1, ( inyr1 + 1 ) / 2 ) );
+            c2_t lastout = c2Add( ci, c2Scale( e1, ( outyr1 + 1 ) / 2 ) );
+            if ( ( IS_ON_MAP( lastin ) && ! READ_PIXEL( lastin ) )
+                && ( IS_ON_MAP( lastout ) && ! READ_PIXEL( lastout ) ) ) {
+                bounds1 = r1;
+            } else {
+                int top = ( outyr0 + 1 ) / 2;
+                int bottom = Mini( ( inyr1 + 1 ) / 2, limit1 );
+                int y;
+                c2_t p = c2Add( ci, c2Scale( e1, bottom ) );
+                for ( y = bottom * 2; y >= top * 2; y -= 2, p = c2Sub( p, e1 ) ) {
+                    if ( ! READ_PIXEL( p ) ) {
+                        break;
+                    }
+                    // pixels that force ray corrections are lit too
+                    WRITE_PIXEL( p, 255 );
+                }
+                bounds1 = c2xy( i2 + 1, y + 1 );
+                inyr1 = ( i2 - 1 ) * bounds1.y / bounds1.x;
+                outyr1 = ( i2 + 1 ) * bounds1.y / bounds1.x;
+            }
+
+            // closed frustum - quit
+            if ( c2CrossC( bounds0, bounds1 ) <= 0 ) {
+                continue;
+            }
+
+            // push actual rays
+            {
+                ADD_RAY( bounds0 );
+                int top = ( outyr0 + 1 ) / 2;
+                int bottom = Mini( ( inyr1 + 1 ) / 2, limit1 );
+                c2_t p = c2Add( ci, c2Scale( e1, top ) );
+                int prevPixel = READ_PIXEL( p );
+                for ( int y = top * 2; y <= bottom * 2; y += 2, p = c2Add( p, e1 ) ) {
+                    int pixel = READ_PIXEL( p );
+                    if ( prevPixel != pixel ) {
+                        c2_t ray;
+                        if ( pixel ) {
+                            ray = c2xy( i2 + 1, y - 1 );
+                        } else {
+                            ray = c2xy( i2 - 1, y - 1 );
+                        }
+                        ADD_RAY( ray );
+                    }
+                    prevPixel = pixel;
+                }
+                ADD_RAY( bounds1 );
             }
         }
+        ci = c2Add( ci, e0 );
+    }
 
-        local.x++;
-
-        // this too can be replaced by an addition and kept in a wColumn member
-        // but it leads to more bookkeeping inside frustum correction
-        for ( int i = 0; i < numFrust; i++ ) {
-            frustRay_t *fr = &frust[i];
-            fr->w = c2CrossC( fr->v, c2xy( local.x, 0 ) );
+    if ( ! skipAttenuation ) {
+        c2_t ci = origin;
+        int rsq = radius * radius;
+        for ( int i = 0; i <= limit0; i++ ) {
+            c2_t p = ci;
+            for ( int j = 0; j <= limit1; j++ ) {
+                c2_t d = c2Sub( p, origin );
+                int dsq = c2Dot( d, d );
+                int mod = 255 - Mini( dsq * 255 / rsq, 255 );
+                int lit = !! outBitmap[p.x + p.y * bitmapWidth];
+                WRITE_PIXEL( p, mod * lit );
+                p = c2Add( p, e1 );
+            }
+            ci = c2Add( ci, e0 );
+        }
+    } else if ( ! skipClampToRadius ) {
+        c2_t ci = origin;
+        int rsq = radius * radius;
+        for ( int i = 0; i <= limit0; i++ ) {
+            c2_t p = ci;
+            for ( int j = 0; j <= limit1; j++ ) {
+                c2_t d = c2Sub( p, origin );
+                if ( c2Dot( d, d ) > rsq ) { 
+                    WRITE_PIXEL( p, 0 );
+                }
+                p = c2Add( p, e1 );
+            }
+            ci = c2Add( ci, e0 );
         }
     }
+
+    if ( darkWalls ) {
+        c2_t ci = origin;
+        for ( int i = 0; i <= limit0; i++ ) {
+            c2_t p = ci;
+            for ( int j = 0; j <= limit1; j++ ) {
+                if ( READ_PIXEL( p ) ) { 
+                    WRITE_PIXEL( p, 0 );
+                }
+                p = c2Add( p, e1 );
+            }
+            ci = c2Add( ci, e0 );
+        }
+    } 
 }
