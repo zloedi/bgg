@@ -10,9 +10,6 @@
 
    To rasterize the entire FOV, call this in a loop with octant in range 0-7
    Inspired by http://blogs.msdn.com/b/ericlippert/archive/2011/12/12/shadowcasting-in-c-part-one.aspx
-
-   See the result here: 
-      http://youtu.be/O8xxVQ1fcTE
 */
 
 #include "zhost.h"
