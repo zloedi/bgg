@@ -152,6 +152,7 @@ int main( int argc, char *argv[] ) {
                X_RegisterVars_f,
                X_Init_f,
                X_Frame_f,
-               X_Done_f );
+               X_Done_f,
+               0 );
     return 0;
 }
