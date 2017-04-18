@@ -117,7 +117,7 @@ static void X_Frame_f( void ) {
     }
     v2_t windowSize = R_GetWindowSize();
     x_pixelScale = windowSize.y / ( float )x_maze.size.y;
-    v2_t mouse = I_GetMousePosition();
+    v2_t mouse = I_GetMousePositionV();
     v2_t origin = v2Scale( mouse, 1 / x_pixelScale );
     memset( x_view.bits, 0, sizeof( *x_view.bits ) * x_view.size.x * x_view.size.y );
     if ( ! VAR_Num( x_skipMaze ) ) {
