@@ -6,8 +6,9 @@ sys.path.append( SCRIPTS_DIR )
 import zbld
 
 APP_OBJS = [
-    "roguelike_FOV",
     "main",
+    "roguelike_FOV",
+    "world",
 ]
 
 zbld.Configure( appObjs = [( "./", APP_OBJS )], targetName = "bgg" )
