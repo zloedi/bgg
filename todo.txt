@@ -2,17 +2,20 @@
 
 Survival play mode: player moves and shoots infinite number of hostile zombies with a gun for score. 
     Spawn progressively larger amount of zombies. Player has two lives +1Ups.
+    Sound support in the engine.
+        Load samples.
+        Play samples.
     Hero moves.
         Draw the hero.
         Use keys to move the hero.
-        Background/Terrain to signify movement (no obstacles).
+        Background/Terrain to show movement (no obstacles).
         Sound for steps.
         [OPTIONAL]Leave footsteps, traced by zombies?
     Hero rotates and aims.
-        Communicate direction.
+        Communicate direction vector.
             Maybe some non-circular artifacts.
-            Draw a cursor to signify hero direction.
-            Draw the aiming line at hero direction.
+            Draw a direction cursor.
+            Draw the aiming line at hero looking direction.
         Rotating the hero ascii char should be an option.
         Use mouse to aim/rotate.
         Sound for steps.
