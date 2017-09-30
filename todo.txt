@@ -1,0 +1,62 @@
+== CORE ==
+
+Survival play mode: player moves and shoots infinite number of hostile zombies with a gun for score. 
+    Spawn progressively larger amount of zombies. Player has two lives +1Ups.
+    Hero moves.
+        Draw the hero.
+        Use keys to move the hero.
+        Background/Terrain to signify movement (no obstacles).
+        Sound for steps.
+        [OPTIONAL]Leave footsteps, traced by zombies?
+    Hero rotates and aims.
+        Communicate direction.
+            Maybe some non-circular artifacts.
+            Draw a cursor to signify hero direction.
+            Draw the aiming line at hero direction.
+        Rotating the hero ascii char should be an option.
+        Use mouse to aim/rotate.
+        Sound for steps.
+    Hero shoots.
+        Use left mouse button to shoot.
+        Draw projectile.
+        Particle effects.
+        Light effects.
+        Sound.
+    Zombie moves and rotates.
+        Draw zombie.
+        Move by avoiding stuff and advance toward player.
+        Sound.
+    Zombie attacks.
+        Health indicator on player.
+        Hero death.
+        Particles and fx.
+        Camera shake.
+        Sound.
+    Spawn Zombies.
+        World map with spawn points.
+        Each zombie kill triggers more zombie spawns with a formula.
+        Delay zombie entering the map (transition).
+    Hero attacks, does damage.
+        Color code the hero and the zombies.
+        Health indication on zombies (pulsating, bleeding, blood trails/footsteps).
+        Particles.
+        Zombie death.
+        Sounds.
+    Stats.
+        Health.
+        Lives.
+        Score.
+        Num kills.
+        More.
+More weapons. Equip weapons. Zombies drop weapons. Explosive weapons.
+Different zombie behaviours i.e. charge, crowd control, heavy (boss), small fast.
+Zombies drop weapon parts. Construct weapons from parts.
+AI controlled teammates.
+Terrain and obstacles. Light/Visiblity.
+DOTa play mode. Spawn team units at corners in intervals, three lanes, heroes.
+Walls and interior.
+
+== VEHICLES ==
+== PROCEDURAL WORLD ==
+
+------------------------------------------------------------------------------------------------------------------
