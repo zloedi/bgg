@@ -1,10 +1,15 @@
 == CORE ==
 
 Survival play mode: player moves and shoots infinite number of hostile zombies with a gun for score. 
-    Spawn progressively larger amount of zombies. Player has two lives +1Ups.
+Spawn progressively larger amount of zombies. Player has two lives +1Ups.
     Sound support in the engine.
+        Build and embed SDL_Mixer
         Load samples.
+            RegisterSample
+            ReloadSamples
         Play samples.
+            OneShot( Sample, volume )
+            Loop( Sample, volume )
     Hero moves.
         Draw the hero.
         Use keys to move the hero.
@@ -61,5 +66,6 @@ Walls and interior.
 
 == VEHICLES ==
 == PROCEDURAL WORLD ==
+== VILLAGES / CHARACTERS RELATION / FACTIONS ==
 
 ------------------------------------------------------------------------------------------------------------------
