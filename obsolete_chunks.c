@@ -156,3 +156,49 @@ int main( int argc, char *argv[] ) {
                0 );
     return 0;
 }
+
+//===================================================================================
+
+#include "zhost.h"
+
+//typedef struct {
+//} sndSample_t;
+
+#define MAX_SAMPLES 32
+
+//static sndSample_t snd_samples[MAX_SAMPLES];
+
+//sndSample_t* SND_RegisterSample( const char *fileName ) {
+//}
+
+//void SND_PlaySample( sndSample_t *sample ) {
+//}
+
+Mix_Chunk* chunk;
+
+void SND_Init( void ) {
+    //// load support for the OGG and MOD sample/music formats
+    ////int flags = MIX_INIT_OGG | MIX_INIT_MOD;
+    ////Mix_Init( 0 );
+    //if( Mix_OpenAudio( 48000, MIX_DEFAULT_FORMAT, 2, 1024 ) < 0 ) { 
+    //    CON_Printf( "SDL_mixer could not initialize! SDL_mixer Error: %s\n", Mix_GetError() );
+    //    return;
+    //}
+    ////chunk = Mix_LoadWAV( va( "%sdata/gunshot.wav", SYS_BaseDir() ) );
+    //chunk = Mix_LoadWAV( va( "%sdata/gunshot_mono.wav", SYS_BaseDir() ) );
+    //Mix_AllocateChannels(16);
+    ////if((initted&flags) != flags) {
+    ////    printf("Mix_Init: Failed to init required ogg and mod support!\n");
+    ////    printf("Mix_Init: %s\n", Mix_GetError());
+    ////    // handle error
+    ////}
+}
+
+//void SND_Done( void ) {
+//}
+
+void snd_test( void )
+{
+    Mix_PlayChannel( -1, chunk, 0 );
+    PrintInt( Mix_AllocateChannels(-1) );
+}

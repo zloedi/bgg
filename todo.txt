@@ -56,6 +56,9 @@ Terrain and obstacles. Light/Visiblity.
 DOTa play mode. Spawn team units at corners in intervals, three lanes, heroes.
 Walls and interior.
 
+Fixes:
+Commands are not prioritized, linearly serached.
+
 == VEHICLES ==
 == PROCEDURAL WORLD ==
 == VILLAGES / CHARACTERS RELATION / FACTIONS ==

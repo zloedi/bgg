@@ -1,9 +1,20 @@
 #include "zhost.h"
+#include "placeholder_wav.h"
+
+static Mix_Chunk *x_sampleShoot;
+
+static void X_Shoot_f( void ) {
+    Mix_PlayChannel( -1, x_sampleShoot, 0 );
+}
 
 static void X_RegisterVars_f( void ) {
+    CMD_Register( "x_shoot", X_Shoot_f );
+    I_Bind( "mouse left button", "+x_shoot" );
 }
 
 static void X_Init_f( void ) {
+    SDL_RWops *buffer = SDL_RWFromMem( placeholder_wav, placeholder_wav_len );
+    x_sampleShoot = Mix_LoadWAV_RW( buffer, false );
 }
 
 static void X_Frame_f( void ) {
