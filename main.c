@@ -10,7 +10,6 @@ static Mix_Chunk *x_samplePlaceholder;
 static Mix_Chunk *x_sampleThunder;
 static Mix_Chunk *x_sampleGunshot;
 static Mix_Chunk *x_sampleCasingFallThick;
-static Mix_Chunk *x_sampleCasingFallThin;
 
 typedef void (*futureAction_t) ( void );
 
@@ -76,8 +75,7 @@ static void PlayThunder_f( void ) {
 }
 
 static void PlayCasingFalling_f( void ) {
-    Mix_PlayChannel( -1, x_sampleCasingFallThin, 0 );
-    //Mix_PlayChannel( -1, x_sampleCasingFallThick, 0 );
+    Mix_PlayChannel( -1, x_sampleCasingFallThick, 0 );
 }
 
 static void X_Shoot_f( void ) {
@@ -95,16 +93,15 @@ static void X_RegisterVars_f( void ) {
 
 static void X_Init_f( void ) {
     x_musicPlaceholder = Mix_LoadMUS_RW( SDL_RWFromMem( placeholder_wav, placeholder_wav_len ), false );
-    x_musicRain = LoadMusic( "rain.wav" );
+    x_musicRain = LoadMusic( "rain.ogg" );
     Mix_PlayMusic( x_musicRain, -1 );
     if ( VAR_Num( x_skipRain ) ) {
         Mix_PauseMusic();
     }
     x_samplePlaceholder = Mix_LoadWAV_RW( SDL_RWFromMem( placeholder_wav, placeholder_wav_len ), false );
-    x_sampleThunder = LoadSample( "thunder.wav" );
-    x_sampleGunshot = LoadSample( "gunshot.wav" );
-    x_sampleCasingFallThick = LoadSample( "casing_falling_thick.wav" );
-    x_sampleCasingFallThin = LoadSample( "casing_falling_thin.wav" );
+    x_sampleThunder = LoadSample( "thunder.ogg" );
+    x_sampleGunshot = LoadSample( "gunshot.ogg" );
+    x_sampleCasingFallThick = LoadSample( "casing_falling_thick.ogg" );
     ExecuteAfterDelay( 2000, PlayThunder_f );
 }
 
