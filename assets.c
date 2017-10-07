@@ -1,4 +1,10 @@
 #include "zhost.h"
+//#define STB_IMAGE_IMPLEMENTATION
+#define STBI_ASSERT(x)
+#define STBI_MALLOC A_Malloc
+#define STBI_REALLOC A_Realloc
+#define STBI_FREE A_Free
+#include "stb_image.h"
 #include "placeholder_wav.h"
 
 Mix_Music *ast_musRain;
