@@ -13,7 +13,7 @@ int* W_GenerateChunk( c2_t pos ) {
     if ( ! img ) {
         int n;
         c2_t sz;
-        bits = R_LoadImageRaw( "noise_256.png", &sz, &n );
+        bits = R_LoadImageRaw( "noise_256.png", &sz, &n, 0 );
         img = R_CreateStaticTexture( bits, sz, n );
     }
     return NULL;

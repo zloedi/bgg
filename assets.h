@@ -6,3 +6,5 @@ Mix_Chunk *ast_wavCasingFallThick;
 
 void AST_Init( void );
 void AST_Done( void );
+void AST_Frame( void );
+void AST_RegisterVars( void );

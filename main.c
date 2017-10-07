@@ -1,4 +1,4 @@
-#include "zhost.h"
+#include "bgg.h"
 #include "assets.h"
 
 static var_t *x_skipRain;
@@ -56,6 +56,7 @@ static void X_Shoot_f( void ) {
 }
 
 static void X_RegisterVars_f( void ) {
+    AST_RegisterVars();
     x_skipRain = VAR_Register( "x_skipRain", "0" );
     CMD_Register( "x_shoot", X_Shoot_f );
     I_Bind( "mouse left button", "+x_shoot" );
@@ -79,6 +80,7 @@ static void X_Frame_f( void ) {
             Mix_ResumeMusic();
         }
     }
+    AST_Frame();
 }
 
 static void X_Done_f( void ) {
