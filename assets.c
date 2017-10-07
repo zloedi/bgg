@@ -1,11 +1,6 @@
 #include "bgg.h"
 #include "placeholder_wav.h"
-
-typedef struct {
-    c2_t size;
-    byte *bitmap;
-    SDL_Texture *texture;
-} astVisual_t;
+#include "assets.h"
 
 astVisual_t ast_visTileset;
 Mix_Music *ast_musRain;
@@ -54,7 +49,8 @@ static astVisual_t AST_LoadVisual( const char *name ) {
     if ( bitmap && bytesPerPixel == 1 ) {
         SDL_Texture *tex = R_CreateStaticTexFromBitmap( bitmap, size, bytesPerPixel );
         astVisual_t result = {
-            .size = size,
+            .sizeC = size,
+            .sizeV = v2c2( size ),
             .bitmap = bitmap,
             .texture = tex,
         };
@@ -69,7 +65,8 @@ static void AST_DestroyVisual( astVisual_t *vis ) {
 }
 
 void AST_Init( void ) {
-    ast_visFallback.size = c2one,
+    ast_visFallback.sizeC = c2one,
+    ast_visFallback.sizeV = v2one,
     ast_visFallback.bitmap = A_MallocZero( 1 ),
     ast_visFallback.texture = R_CreateStaticTexFromBitmap( ast_visFallback.bitmap, c2one, 1 );
     ast_visTileset = AST_LoadVisual( "cp437_12x12.png" );
@@ -91,8 +88,8 @@ static void AST_DrawTileset( v2_t position, color_t color ) {
     SDL_Rect dest = {
         .x = position.x,
         .y = position.y,
-        .w = ast_visTileset.size.x,
-        .h = ast_visTileset.size.y,
+        .w = ast_visTileset.sizeC.x,
+        .h = ast_visTileset.sizeC.y,
     };
     SDL_RenderCopy( r_renderer, ast_visTileset.texture, NULL, &dest );
 }
@@ -100,7 +97,7 @@ static void AST_DrawTileset( v2_t position, color_t color ) {
 void AST_Frame( void ) {
     if ( VAR_Num( ast_showTileset ) ) {
         //PrintInt( ast_visTileset.size.x );
-        AST_DrawTileset( v2xy( R_GetWindowSize().x - ast_visTileset.size.x, 0 ), colWhite );
+        AST_DrawTileset( v2xy( R_GetWindowSize().x - ast_visTileset.sizeV.x, 0 ), colWhite );
     }
 }
 

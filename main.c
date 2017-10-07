@@ -15,6 +15,36 @@ typedef struct {
 static int x_numFutures;
 static future_t x_futures[MAX_FUTURES];
 
+static void DrawCenteredTile( int index, v2_t screenPos, float scale, float angle ) {
+    v2_t tileSize = v2Scale( ast_visTileset.sizeV, 1 / 16.0f );
+    c2_t st = c2xy( ( index & 15 ) * tileSize.x, ( index / 16 ) * tileSize.y );
+    SDL_Rect src = {
+        .x = st.x,
+        .y = st.y,
+        .w = tileSize.x,
+        .h = tileSize.y,
+    };
+    SDL_Rect dst = {
+        .x = screenPos.x - scale * tileSize.x / 2,
+        .y = screenPos.y - scale * tileSize.y / 2,
+        .w = tileSize.x * scale,
+        .h = tileSize.y * scale,
+    };
+    SDL_RenderCopyEx(r_renderer,
+                     ast_visTileset.texture,
+                     &src,
+                     &dst,
+                     angle,
+                     NULL,
+                     SDL_FLIP_NONE);
+}
+
+static void DrawCharacter( v2_t screenPos, v2_t direction, float scale ) {
+    float angle = atan2( direction.y, direction.x ) / ( M_PI * 2 ) * 360;
+    DrawCenteredTile( '@', screenPos, scale, 0 );//3 + sin( SYS_RealTime() * 0.01 ), SYS_RealTime() * 0.1 );
+    DrawCenteredTile( '(', screenPos, scale, angle );//3 + sin( SYS_RealTime() * 0.01 ), SYS_RealTime() * 0.1 );
+}
+
 static void ExecuteAfterDelay( int delayMs, futureAction_t action ) {
     if ( x_numFutures < MAX_FUTURES ) {
         future_t new = {
@@ -81,6 +111,10 @@ static void X_Frame_f( void ) {
         }
     }
     AST_Frame();
+    v2_t origin = v2Scale( R_GetWindowSize(), 0.5 );
+    v2_t toMouse = v2Sub( I_GetMousePositionV(), origin );
+    v2_t direction = v2Norm( toMouse );
+    DrawCharacter( origin, direction, 8 );
 }
 
 static void X_Done_f( void ) {
