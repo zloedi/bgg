@@ -52,6 +52,7 @@ Walls and interior.
 
 Fixes:
 Commands are not prioritized, linearly serached.
+Binds are not serialized.
 
 == VEHICLES ==
 == PROCEDURAL WORLD ==
@@ -60,7 +61,7 @@ Commands are not prioritized, linearly serached.
 ------------------------------------------------------------------------------------------------------------------
 
 IN PROGRESS
-    Do rain ambient sound and thunder.
+    * Do rain ambient sound and thunder.
     Hero moves.
         Draw the hero.
         Use keys to move the hero.
