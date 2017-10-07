@@ -62,6 +62,7 @@ Binds are not serialized.
 
 IN PROGRESS
     * Do rain ambient sound and thunder.
+        * Cleanup sdl mixer.
     Hero moves.
         Draw the hero.
         Use keys to move the hero.

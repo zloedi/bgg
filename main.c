@@ -1,15 +1,7 @@
 #include "zhost.h"
-#include "placeholder_wav.h"
+#include "assets.h"
 
 static var_t *x_skipRain;
-
-static Mix_Music *x_musicPlaceholder;
-static Mix_Music *x_musicRain;
-
-static Mix_Chunk *x_samplePlaceholder;
-static Mix_Chunk *x_sampleThunder;
-static Mix_Chunk *x_sampleGunshot;
-static Mix_Chunk *x_sampleCasingFallThick;
 
 typedef void (*futureAction_t) ( void );
 
@@ -45,41 +37,19 @@ static void UpdateFutures( void ) {
     }
 }
 
-static Mix_Music* LoadMusic( const char *name ) {
-    Mix_Music *music = Mix_LoadMUS( va( "%sdata/%s", SYS_BaseDir(), name ) );
-    if ( ! music ) {
-        CON_Printf( "LoadMusic: failed to load %s\n", name );
-        music = x_musicPlaceholder;
-    } else {
-        CON_Printf( "Loaded music %s\n", name );
-    }
-    return music;
-}
-
-static Mix_Chunk* LoadSample( const char *name ) {
-    Mix_Chunk *chunk = Mix_LoadWAV( va( "%sdata/%s", SYS_BaseDir(), name ) );
-    if ( ! chunk ) {
-        CON_Printf( "LoadSample: failed to load %s\n", name );
-        chunk = x_samplePlaceholder;
-    } else {
-        CON_Printf( "Loaded sample %s\n", name );
-    }
-    return chunk;
-}
-
 static void PlayThunder_f( void ) {
-    Mix_PlayChannel( -1, x_sampleThunder, 0 );
+    Mix_PlayChannel( -1, ast_wavThunder, 0 );
     int delay = COM_RandInRange( 15000, 30000 );
     CON_Printf( "Thunder going off. Next in %d seconds\n", delay / 1000 );
     ExecuteAfterDelay( delay, PlayThunder_f );
 }
 
 static void PlayCasingFalling_f( void ) {
-    Mix_PlayChannel( -1, x_sampleCasingFallThick, 0 );
+    Mix_PlayChannel( -1, ast_wavCasingFallThick, 0 );
 }
 
 static void X_Shoot_f( void ) {
-    Mix_PlayChannel( -1, x_sampleGunshot, 0 );
+    Mix_PlayChannel( -1, ast_wavGunshot, 0 );
     if ( ( COM_Rand() & 1023 ) < 100 ) {
         ExecuteAfterDelay( COM_RandInRange( 300, 500 ), PlayCasingFalling_f );
     }
@@ -92,16 +62,11 @@ static void X_RegisterVars_f( void ) {
 }
 
 static void X_Init_f( void ) {
-    x_musicPlaceholder = Mix_LoadMUS_RW( SDL_RWFromMem( placeholder_wav, placeholder_wav_len ), false );
-    x_musicRain = LoadMusic( "rain.ogg" );
-    Mix_PlayMusic( x_musicRain, -1 );
+    AST_Init();
+    Mix_PlayMusic( ast_musRain, -1 );
     if ( VAR_Num( x_skipRain ) ) {
         Mix_PauseMusic();
     }
-    x_samplePlaceholder = Mix_LoadWAV_RW( SDL_RWFromMem( placeholder_wav, placeholder_wav_len ), false );
-    x_sampleThunder = LoadSample( "thunder.ogg" );
-    x_sampleGunshot = LoadSample( "gunshot.ogg" );
-    x_sampleCasingFallThick = LoadSample( "casing_falling_thick.ogg" );
     ExecuteAfterDelay( 2000, PlayThunder_f );
 }
 
@@ -117,6 +82,7 @@ static void X_Frame_f( void ) {
 }
 
 static void X_Done_f( void ) {
+    AST_Done();
 }
 
 int main( int argc, char *argv[] ) {
