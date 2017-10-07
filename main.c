@@ -51,6 +51,8 @@ static Mix_Music* LoadMusic( const char *name ) {
     if ( ! music ) {
         CON_Printf( "LoadMusic: failed to load %s\n", name );
         music = x_musicPlaceholder;
+    } else {
+        CON_Printf( "Loaded music %s\n", name );
     }
     return music;
 }
@@ -60,6 +62,8 @@ static Mix_Chunk* LoadSample( const char *name ) {
     if ( ! chunk ) {
         CON_Printf( "LoadSample: failed to load %s\n", name );
         chunk = x_samplePlaceholder;
+    } else {
+        CON_Printf( "Loaded sample %s\n", name );
     }
     return chunk;
 }
@@ -90,14 +94,13 @@ static void X_RegisterVars_f( void ) {
 }
 
 static void X_Init_f( void ) {
-    SDL_RWops *buffer = SDL_RWFromMem( placeholder_wav, placeholder_wav_len );
-    x_musicPlaceholder = Mix_LoadMUS_RW( buffer, false );
+    x_musicPlaceholder = Mix_LoadMUS_RW( SDL_RWFromMem( placeholder_wav, placeholder_wav_len ), false );
     x_musicRain = LoadMusic( "rain.wav" );
     Mix_PlayMusic( x_musicRain, -1 );
     if ( VAR_Num( x_skipRain ) ) {
         Mix_PauseMusic();
     }
-    x_samplePlaceholder = Mix_LoadWAV_RW( buffer, false );
+    x_samplePlaceholder = Mix_LoadWAV_RW( SDL_RWFromMem( placeholder_wav, placeholder_wav_len ), false );
     x_sampleThunder = LoadSample( "thunder.wav" );
     x_sampleGunshot = LoadSample( "gunshot.wav" );
     x_sampleCasingFallThick = LoadSample( "casing_falling_thick.wav" );

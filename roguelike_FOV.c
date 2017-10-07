@@ -33,7 +33,7 @@ void RasterizeFOVOctant( int originX, int originY,
         c2_t rays[MAX_RAYS];
     } raysList_t;
     // keep these coupled like this
-    static const const c2_t bases[] = {
+    static const c2_t bases[] = {
         { { 1, 0  } }, { { 0, 1  } },
         { { 1, 0  } }, { { 0, -1 } },
         { { -1, 0 } }, { { 0, -1 } },
