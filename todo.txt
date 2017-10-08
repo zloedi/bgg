@@ -68,6 +68,7 @@ IN PROGRESS
             Draw framed circle with the @ symbol inside.
             Draw a marker showing the direction.
         Background/Terrain to show movement (no obstacles).
+            Implement camera zoom in/out.
             Background made with nice noise using tiles.
             Backround moves.
         Use keys to move the hero.
