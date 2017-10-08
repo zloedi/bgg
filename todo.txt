@@ -65,8 +65,13 @@ IN PROGRESS
         * Cleanup sdl mixer.
     Hero moves.
         Draw the hero.
-        Use keys to move the hero.
+            Draw framed circle with the @ symbol inside.
+            Draw a marker showing the direction.
         Background/Terrain to show movement (no obstacles).
+            Background made with nice noise using tiles.
+            Backround moves.
+        Use keys to move the hero.
+            Hero always locked at center of screen.
         Sound for steps.
         [OPTIONAL]Leave footsteps, traced by zombies?
     Do lighting visual effect.
