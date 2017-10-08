@@ -42,7 +42,8 @@ Spawn progressively larger amount of zombies. Player has two lives +1Ups.
         Score.
         Num kills.
         More.
-More weapons. Equip weapons. Zombies drop weapons. Explosive weapons.
+Save/Load game state.
+More weapons. Equip weapons. Zombies drop weapons. Explosive weapons. Electric chain weapons.
 Different zombie behaviours i.e. charge, crowd control, heavy (boss), small fast.
 Zombies drop weapon parts. Construct weapons from parts.
 AI controlled teammates.
@@ -53,6 +54,8 @@ Walls and interior.
 Fixes:
 Commands are not prioritized, linearly serached.
 Binds are not serialized.
+
+Modular weapons? Loot consistst of pipes, springs, sheets of metal? Can be used in vehicles too.
 
 == VEHICLES ==
 == PROCEDURAL WORLD ==
