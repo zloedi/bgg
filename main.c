@@ -110,11 +110,14 @@ static void X_Frame_f( void ) {
             Mix_ResumeMusic();
         }
     }
-    AST_Frame();
+    SDL_SetTextureColorMod( ast_visTileset.texture, 255, 255, 255 );
+    SDL_SetTextureAlphaMod( ast_visTileset.texture, 255 );
+    SDL_SetTextureBlendMode( ast_visTileset.texture, SDL_BLENDMODE_BLEND );
     v2_t origin = v2Scale( R_GetWindowSize(), 0.5 );
     v2_t toMouse = v2Sub( I_GetMousePositionV(), origin );
     v2_t direction = v2Norm( toMouse );
     DrawCharacter( origin, direction, 8 );
+    AST_Frame();
 }
 
 static void X_Done_f( void ) {
