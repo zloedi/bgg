@@ -16,7 +16,7 @@ static int x_numFutures;
 static future_t x_futures[MAX_FUTURES];
 
 static void DrawCenteredTile( int index, v2_t screenPos, float scale, float angle ) {
-    v2_t tileSize = v2Scale( ast_visTileset.sizeV, 1 / 16.0f );
+    v2_t tileSize = v2Scale( ast_imgTileset.sizeV, 1 / 16.0f );
     c2_t st = c2xy( ( index & 15 ) * tileSize.x, ( index / 16 ) * tileSize.y );
     SDL_Rect src = {
         .x = st.x,
@@ -31,7 +31,7 @@ static void DrawCenteredTile( int index, v2_t screenPos, float scale, float angl
         .h = tileSize.y * scale,
     };
     SDL_RenderCopyEx(r_renderer,
-                     ast_visTileset.texture,
+                     ast_imgTileset.texture,
                      &src,
                      &dst,
                      angle,
@@ -110,9 +110,9 @@ static void X_Frame_f( void ) {
             Mix_ResumeMusic();
         }
     }
-    SDL_SetTextureColorMod( ast_visTileset.texture, 255, 255, 255 );
-    SDL_SetTextureAlphaMod( ast_visTileset.texture, 255 );
-    SDL_SetTextureBlendMode( ast_visTileset.texture, SDL_BLENDMODE_BLEND );
+    SDL_SetTextureColorMod( ast_imgTileset.texture, 255, 255, 255 );
+    SDL_SetTextureAlphaMod( ast_imgTileset.texture, 255 );
+    SDL_SetTextureBlendMode( ast_imgTileset.texture, SDL_BLENDMODE_BLEND );
     v2_t origin = v2Scale( R_GetWindowSize(), 0.5 );
     v2_t toMouse = v2Sub( I_GetMousePositionV(), origin );
     v2_t direction = v2Norm( toMouse );

@@ -69,8 +69,14 @@ IN PROGRESS
     Hero moves.
         Draw the hero.
             Draw framed circle with the @ symbol inside.
-                Disk asset.
-                Circle asset.
+                Disk bitmap.Circle bitmap. 
+                    No need to keep bitmap for the atlas after packing of all sprites?
+                        Since all assets (even the procedural) are created on a single event, we don't need to keep bitmaps?
+                    Bake all static parts of the hero in a single rgb bitmap?
+                        Put the ascii table and all other stuff in a single texture (atlas).
+                        No valid reasons if all is one dip.
+                    Allocate all procedural sprites in the atlas?
+                    Generate actual pixels directly in the atlas?
             Draw a marker showing the direction.
         Background/Terrain to show movement (no obstacles).
             Noise map asset.

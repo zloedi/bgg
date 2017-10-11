@@ -1,8 +1,10 @@
 #include "bgg.h"
 #include "placeholder_wav.h"
 #include "assets.h"
+#include "stb_rect_pack.h"
 
-astVisual_t ast_visTileset;
+astImage_t ast_imgTileset;
+astImage_t ast_imgAtlas;
 Mix_Music *ast_musRain;
 
 Mix_Chunk *ast_wavThunder;
@@ -11,7 +13,7 @@ Mix_Chunk *ast_wavCasingFallThick;
 
 static Mix_Chunk *ast_wavFallback;
 static Mix_Music *ast_musFallback;
-static astVisual_t ast_visFallback;
+static astImage_t ast_imgFallback;
 static var_t *ast_showTileset;
 
 static const char* AST_GetAssetPath( const char *name ) {
@@ -40,15 +42,13 @@ static Mix_Chunk* AST_LoadSample( const char *name ) {
     return chunk;
 }
 
-static astVisual_t AST_LoadVisual( const char *name ) {
+static astImage_t AST_LoadImage( const char *name ) {
     c2_t size;
     int bytesPerPixel;
-    // force one byte per pixel, all assets are alpha only
-    // but the renderer SDL textures are only RGBA
-    byte *bitmap = R_LoadImageRaw( name, &size, &bytesPerPixel, 1 );
-    if ( bitmap && bytesPerPixel == 1 ) {
+    byte *bitmap = R_LoadImageRaw( name, &size, &bytesPerPixel, 0 );
+    if ( bitmap ) {
         SDL_Texture *tex = R_CreateStaticTexFromBitmap( bitmap, size, bytesPerPixel );
-        astVisual_t result = {
+        astImage_t result = {
             .sizeC = size,
             .sizeV = v2c2( size ),
             .bitmap = bitmap,
@@ -56,20 +56,20 @@ static astVisual_t AST_LoadVisual( const char *name ) {
         };
         return result;
     }
-    return ast_visFallback;
+    return ast_imgFallback;
 }
 
-static void AST_DestroyVisual( astVisual_t *vis ) {
-    A_Free( vis->bitmap );
-    vis->bitmap = NULL;
+static void AST_DestroyImage( astImage_t *img ) {
+    A_Free( img->bitmap );
+    img->bitmap = NULL;
 }
 
 void AST_Init( void ) {
-    ast_visFallback.sizeC = c2one,
-    ast_visFallback.sizeV = v2one,
-    ast_visFallback.bitmap = A_MallocZero( 1 ),
-    ast_visFallback.texture = R_CreateStaticTexFromBitmap( ast_visFallback.bitmap, c2one, 1 );
-    ast_visTileset = AST_LoadVisual( "cp437_12x12.png" );
+    ast_imgFallback.sizeC = c2one,
+    ast_imgFallback.sizeV = v2one,
+    ast_imgFallback.bitmap = A_MallocZero( 1 ),
+    ast_imgFallback.texture = R_CreateStaticTexFromBitmap( ast_imgFallback.bitmap, c2one, 1 );
+    ast_imgTileset = AST_LoadImage( "cp437_12x12.png" );
     ast_musFallback = Mix_LoadMUS_RW( SDL_RWFromMem( placeholder_wav, placeholder_wav_len ), false );
     ast_musRain = AST_LoadMusic( "rain.ogg" );
     ast_wavFallback = Mix_LoadWAV_RW( SDL_RWFromMem( placeholder_wav, placeholder_wav_len ), false );
@@ -79,31 +79,32 @@ void AST_Init( void ) {
 }
 
 static void AST_DrawTileset( v2_t position, color_t color ) {
-    SDL_SetTextureColorMod( ast_visTileset.texture,
+    SDL_SetTextureColorMod( ast_imgTileset.texture,
             ( Uint8 )( color.r * 255 ), 
             ( Uint8 )( color.g * 255 ),
             ( Uint8 )( color.b * 255 ) );
-    SDL_SetTextureAlphaMod( ast_visTileset.texture, ( Uint8 )( color.alpha * 255 ) );
-    SDL_SetTextureBlendMode( ast_visTileset.texture, SDL_BLENDMODE_BLEND );
+    SDL_SetTextureAlphaMod( ast_imgTileset.texture, ( Uint8 )( color.alpha * 255 ) );
+    SDL_SetTextureBlendMode( ast_imgTileset.texture, SDL_BLENDMODE_BLEND );
     SDL_Rect dest = {
         .x = position.x,
         .y = position.y,
-        .w = ast_visTileset.sizeC.x,
-        .h = ast_visTileset.sizeC.y,
+        .w = ast_imgTileset.sizeC.x,
+        .h = ast_imgTileset.sizeC.y,
     };
-    SDL_RenderCopy( r_renderer, ast_visTileset.texture, NULL, &dest );
+    SDL_RenderCopy( r_renderer, ast_imgTileset.texture, NULL, &dest );
 }
 
 void AST_Frame( void ) {
     if ( VAR_Num( ast_showTileset ) ) {
-        //PrintInt( ast_visTileset.size.x );
-        AST_DrawTileset( v2xy( R_GetWindowSize().x - ast_visTileset.sizeV.x, 0 ), colWhite );
+        //PrintInt( ast_imgTileset.size.x );
+        AST_DrawTileset( v2xy( R_GetWindowSize().x - ast_imgTileset.sizeV.x, 0 ), colWhite );
     }
 }
 
 void AST_Done( void ) {
-    AST_DestroyVisual( &ast_visTileset );
-    AST_DestroyVisual( &ast_visFallback );
+    AST_DestroyImage( &ast_imgAtlas );
+    AST_DestroyImage( &ast_imgTileset );
+    AST_DestroyImage( &ast_imgFallback );
 }
 
 void AST_RegisterVars( void ) {
