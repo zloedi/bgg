@@ -104,13 +104,16 @@ static void AST_PushToPacker( astBitmap_t *bitmaps, int id, stbrp_rect **ioRects
 
 static byte* AST_CreateDiskBitmap( byte *buffer, c2_t size ) {
     c2_t c;
-    int i;
     int r = Mini( size.x, size.y ) / 2;
     int rsq = r * r;
-    for ( i = 0, c.y = 0; c.y < size.y; c.y++ ) {
-        for ( c.x = 0; c.x < size.x; c.x++, i++ ) {
+    for ( c.y = 0; c.y <= r; c.y++ ) {
+        for ( c.x = 0; c.x <= r; c.x++ ) {
             c2_t d = c2Sub( c, c2xy( r, r ) );
-            buffer[i] = c2Dot( d, d ) <= rsq ? 255 : 0;
+            int val = c2Dot( d, d ) < rsq ? 255 : 0;
+            buffer[c.x              + c.y * size.y] = val;
+            buffer[size.x - c.x - 1 + c.y * size.y] = val;
+            buffer[c.x              + ( size.y - c.y - 1 ) * size.y] = val;
+            buffer[size.x - c.x - 1 + ( size.y - c.y - 1 ) * size.y] = val;
         }
     }
     return buffer;
@@ -157,8 +160,9 @@ void AST_Init( void ) {
     ast_tileSizeC = c2Divs( tileset->sizeC, 16 );
     ast_tileSizeV = v2c2( ast_tileSizeC );
     AST_PushToPacker( bitmaps, AST_SPR_TILESET, &rects );
-    byte disk[ast_tileSizeC.x * ast_tileSizeC.y];
-    bitmaps[AST_SPR_DISK] = AST_BitmapFromMem( AST_CreateDiskBitmap( disk, ast_tileSizeC ), ast_tileSizeC );
+    c2_t diskSize = c2Scale( ast_tileSizeC, 2 );
+    byte disk[c2MulComps( diskSize )];
+    bitmaps[AST_SPR_DISK] = AST_BitmapFromMem( AST_CreateDiskBitmap( disk, diskSize ), diskSize );
     AST_PushToPacker( bitmaps, AST_SPR_DISK, &rects );
     c2_t atlasSize = c2one;
     if ( AST_PackRects( rects, &atlasSize ) ) {

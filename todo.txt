@@ -44,6 +44,11 @@ Spawn progressively larger amount of zombies. Player has two lives +1Ups.
         More.
 Save/Load game state.
 More weapons. Equip weapons. Zombies drop weapons. Explosive weapons. Electric chain weapons.
+    Do explosion similar to the ones in the blade runner shorts anime.
+        Use the Disk asset.
+        Render to texture.
+        Explosion consists of fire disk transitioning to the color of a "smoke cap"
+            Also fast expanding trails of debris.
 Different zombie behaviours i.e. charge, crowd control, heavy (boss), small fast.
 Zombies drop weapon parts. Construct weapons from parts.
 AI controlled teammates.
@@ -69,16 +74,17 @@ IN PROGRESS
     Hero moves.
         Draw the hero.
             Draw framed circle with the @ symbol inside.
-                Disk bitmap.Circle bitmap. 
-                    No need to keep bitmap for the atlas after packing of all sprites?
-                        Since all assets (even the procedural) are created on a single event, we don't need to keep bitmaps?
-                        Try to implement support for 8bit texture.
-                            SDL opengl renderer/texture supports only 32bpp and 16bpp luma alpha.
-                    Bake all static parts of the hero in a single rgb bitmap?
-                        Put the ascii table and all other stuff in a single texture (atlas).
-                        No valid reasons if all is one dip.
-                    Allocate all procedural sprites in the atlas?
-                    Generate actual pixels directly in the atlas?
+                * Disk bitmap.Circle bitmap. 
+                    * No need to keep bitmap for the atlas after packing of all sprites?
+                        * Since all assets (even the procedural) are created on a single event, we don't need to keep bitmaps?
+                        * Try to implement support for 8bit texture.
+                            * SDL opengl renderer/texture supports only 32bpp and 16bpp luma alpha.
+                    * Bake all static parts of the hero in a single rgb bitmap?
+                        * Put the ascii table and all other stuff in a single texture (atlas).
+                        * No valid reasons if all is one dip.
+                    * Allocate all procedural sprites in the atlas?
+                    * Generate actual pixels directly in the atlas?
+                Implement hierarchy of transform and use it to setup the character visuals.
             Draw a marker showing the direction.
         Background/Terrain to show movement (no obstacles).
             Noise map asset.
@@ -91,10 +97,6 @@ IN PROGRESS
         [OPTIONAL]Leave footsteps, traced by zombies?
     Do lightning visual effect using color mod.
         Support for multiple colors combined to get final color?
-    Do explosion similar to the ones in the blade runner shorts anime.
-        Use the Disk asset.
-        Explosion consists of fire disk transitioning to the color of a "smoke cap"
-            Also fast expanding trails of debris.
 
 DONE
 
