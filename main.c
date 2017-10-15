@@ -16,22 +16,23 @@ static int x_numFutures;
 static future_t x_futures[MAX_FUTURES];
 
 static void DrawCenteredTile( int index, v2_t screenPos, float scale, float angle ) {
-    v2_t tileSize = v2Scale( ast_imgTileset.sizeV, 1 / 16.0f );
-    c2_t st = c2xy( ( index & 15 ) * tileSize.x, ( index / 16 ) * tileSize.y );
+    astSprite_t *tileset = &ast_sprites[AST_SPR_TILESET];
+    c2_t st = c2xy( ( index & 15 ) * ast_tileSizeC.x, ( index / 16 ) * ast_tileSizeC.y );
+    st = c2Add( st, tileset->originInAtlas );
     SDL_Rect src = {
         .x = st.x,
         .y = st.y,
-        .w = tileSize.x,
-        .h = tileSize.y,
+        .w = ast_tileSizeC.x,
+        .h = ast_tileSizeC.y,
     };
     SDL_Rect dst = {
-        .x = screenPos.x - scale * tileSize.x / 2,
-        .y = screenPos.y - scale * tileSize.y / 2,
-        .w = tileSize.x * scale,
-        .h = tileSize.y * scale,
+        .x = screenPos.x - scale * ast_tileSizeC.x / 2,
+        .y = screenPos.y - scale * ast_tileSizeC.y / 2,
+        .w = ast_tileSizeC.x * scale,
+        .h = ast_tileSizeC.y * scale,
     };
     SDL_RenderCopyEx(r_renderer,
-                     ast_imgTileset.texture,
+                     tileset->atlas->texture,
                      &src,
                      &dst,
                      angle,
@@ -110,9 +111,10 @@ static void X_Frame_f( void ) {
             Mix_ResumeMusic();
         }
     }
-    SDL_SetTextureColorMod( ast_imgTileset.texture, 255, 255, 255 );
-    SDL_SetTextureAlphaMod( ast_imgTileset.texture, 255 );
-    SDL_SetTextureBlendMode( ast_imgTileset.texture, SDL_BLENDMODE_BLEND );
+    astSprite_t *tileset = &ast_sprites[AST_SPR_TILESET];
+    SDL_SetTextureColorMod( tileset->atlas->texture, 255, 255, 255 );
+    SDL_SetTextureAlphaMod( tileset->atlas->texture, 255 );
+    SDL_SetTextureBlendMode( tileset->atlas->texture, SDL_BLENDMODE_BLEND );
     v2_t origin = v2Scale( R_GetWindowSize(), 0.5 );
     v2_t toMouse = v2Sub( I_GetMousePositionV(), origin );
     v2_t direction = v2Norm( toMouse );

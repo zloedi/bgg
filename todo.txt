@@ -72,6 +72,8 @@ IN PROGRESS
                 Disk bitmap.Circle bitmap. 
                     No need to keep bitmap for the atlas after packing of all sprites?
                         Since all assets (even the procedural) are created on a single event, we don't need to keep bitmaps?
+                        Try to implement support for 8bit texture.
+                            SDL opengl renderer/texture supports only 32bpp and 16bpp luma alpha.
                     Bake all static parts of the hero in a single rgb bitmap?
                         Put the ascii table and all other stuff in a single texture (atlas).
                         No valid reasons if all is one dip.
