@@ -63,6 +63,7 @@ Binds are not serialized.
 Modular weapons? Loot consistst of pipes, springs, sheets of metal? Can be used in vehicles too.
 
 == VEHICLES ==
+When vehicle go near vegetation, vegetation moves.
 == PROCEDURAL WORLD ==
 == VILLAGES / CHARACTERS RELATION / FACTIONS ==
 
