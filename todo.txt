@@ -63,7 +63,13 @@ Binds are not serialized.
 Modular weapons? Loot consistst of pipes, springs, sheets of metal? Can be used in vehicles too.
 
 == VEHICLES ==
+Vecicles with ICE/Electric engines for people and cargo.
+Hovering drones.
 When vehicle go near vegetation, vegetation moves.
+== TECH ==
+Radio towers for signal used by vehicles, drones and beacons.
+Drone can be send and collect data, even transmit video in realtime.
+For example broken vehicle or drone can broadcast until it's battery is dead.
 == PROCEDURAL WORLD ==
 == VILLAGES / CHARACTERS RELATION / FACTIONS ==
 
