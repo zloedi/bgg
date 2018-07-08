@@ -74,6 +74,8 @@ Automated turrets with cable infrastructure.
 Remotely powered with cables machines.
 == PROCEDURAL WORLD ==
 == VILLAGES / CHARACTERS RELATION / FACTIONS ==
+Zombies clump together, basically ignoring eachother, charge at last step.
+Humans stay apart, try not to block eachother's paths.
 
 ------------------------------------------------------------------------------------------------------------------
 
