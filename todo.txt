@@ -70,6 +70,8 @@ When vehicle go near vegetation, vegetation moves.
 Radio towers for signal used by vehicles, drones and beacons.
 Drone can be send and collect data, even transmit video in realtime.
 For example broken vehicle or drone can broadcast until it's battery is dead.
+Automated turrets with cable infrastructure.
+Remotely powered with cables machines.
 == PROCEDURAL WORLD ==
 == VILLAGES / CHARACTERS RELATION / FACTIONS ==
 
