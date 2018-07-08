@@ -10,6 +10,116 @@ typedef struct {
     futureAction_t action;
 } future_t;
 
+typedef enum {
+    CT_RENDERER,
+    CT_NUM_TYPES,
+} compType_t;
+
+typedef struct {
+    int parent;
+    v2_t down;
+    v2_t right;
+    v2_t position;
+    v2_t localDown;
+    v2_t localRight;
+    v2_t localPosition;
+    void *components[CT_NUM_TYPES];
+} compEntity_t;
+
+typedef struct {
+    int entity;
+    astSprite_t sprite;
+    color_t color;
+} compRenderer_t;
+
+#define HUNK_CHANGE_SEQUENCE SYS_RealTime
+#define HUNK_SIZE (128*1024)
+
+typedef struct {
+    int numElements;
+    int changeStamp;
+    byte buffer[];
+} hunk_t;
+
+const size_t hunkHeadSize = ( size_t )&((hunk_t*)0)->buffer;
+
+#define HunkPushBack(a,v) ((a)[_HunkHead(a)->numElements++]=(v),_HunkChange(a))
+#define HunkLast(a) ((a)[_HunkHead(a)->numElements-1])
+
+static inline hunk_t* _HunkHead( void *a ) {
+    return ( hunk_t* )( ( byte* )a - hunkHeadSize );
+}
+
+static inline void _HunkChange( void *a ) {
+    _HunkHead( a )->changeStamp = HUNK_CHANGE_SEQUENCE();
+}
+
+static inline void* HunkAlloc( size_t size ) {
+    return ( ( hunk_t* )A_Static( hunkHeadSize + size ) )->buffer;
+}
+
+static inline bool_t HunkChanged( void *a ) {
+    return _HunkHead( a )->changeStamp == HUNK_CHANGE_SEQUENCE();
+}
+
+static inline void HunkPopBack( void *a ) {
+    _HunkHead( a )->numElements--;
+    _HunkChange( a );
+}
+
+static inline int HunkNumElems( void* a ) {
+    return _HunkHead( a )->numElements;
+}
+
+static void *x_compBins[CT_NUM_TYPES];
+
+//static int x_transformsSequence;
+//static compEntity_t *x_transforms[2];
+
+//static compEntity_t* GetTransforms( int sequence ) {
+//    return x_transforms[sequence & 1];
+//}
+
+static compRenderer_t* GetRenderers( void ) {
+    return x_compBins[CT_RENDERER];
+}
+
+static void CreateRenderer( int entity, astSprite_t sprite, compRenderer_t *renderers ) {
+    //int numElements = *( ( int* )renderers - 1 );
+    //if ( entity == 0 ) {
+    //    CON_Printf( CreateRenderer
+    //}
+    compRenderer_t rend = {
+        .color = colWhite,
+        .sprite = sprite,
+    };
+    HunkPushBack( renderers, rend );
+}
+
+static void UpdateRenderers( compRenderer_t *renderers ) {
+}
+
+static void SetParentTransform( int this, int parent ) {
+}
+
+static void DeleteTransform( int entity ) {
+    //for ( int i = entity; ; i++ ) {
+    //    compEntity_t *t = &x_transforms[i];
+    //    if ( t->parent == INVALID_TRANSFORM_PARENT ) {
+    //        break;
+    //    }
+    //    if ( t->parent < entity ) {
+    //        break;
+    //    }
+    //    t->parent = INVALID_TRANSFORM_PARENT;
+    //}
+    //x_transformsNeedSort = true;
+}
+
+static void* GetComponent( compEntity_t *ent, compType_t type ) {
+    return ent->components[type];
+}
+
 #define MAX_FUTURES 256
 
 static int x_numFutures;
@@ -17,6 +127,9 @@ static future_t x_futures[MAX_FUTURES];
 
 static void DrawCenteredTile( int index, v2_t screenPos, float scale, float angle ) {
     astSprite_t *tileset = &ast_sprites[AST_SPR_TILESET];
+    SDL_SetTextureColorMod( tileset->atlas->texture, 255, 255, 255 );
+    SDL_SetTextureAlphaMod( tileset->atlas->texture, 255 );
+    SDL_SetTextureBlendMode( tileset->atlas->texture, SDL_BLENDMODE_BLEND );
     c2_t st = c2xy( ( index & 15 ) * ast_tileSizeC.x, ( index / 16 ) * ast_tileSizeC.y );
     st = c2Add( st, tileset->originInAtlas );
     SDL_Rect src = {
@@ -87,14 +200,21 @@ static void X_Shoot_f( void ) {
 }
 
 static void X_RegisterVars_f( void ) {
+    VAR_SetCFGVersion( 1 );
     AST_RegisterVars();
     x_skipRain = VAR_Register( "x_skipRain", "0" );
     CMD_Register( "x_shoot", X_Shoot_f );
-    I_Bind( "mouse left button", "+x_shoot" );
+    I_Bind( "mouse left button", "!x_shoot" );
 }
 
 static void X_Init_f( void ) {
     AST_Init();
+    for ( int i = 0; i < CT_NUM_TYPES; i++ ) {
+        x_compBins[i] = HunkAlloc( HUNK_SIZE );
+    }
+    //x_transforms[0] = x_compBins[CT_TRANSFORM];
+    //x_transforms[1] = HunkAlloc( HUNK_SIZE );
+
     Mix_PlayMusic( ast_musRain, -1 );
     if ( VAR_Num( x_skipRain ) ) {
         Mix_PauseMusic();
@@ -111,10 +231,6 @@ static void X_Frame_f( void ) {
             Mix_ResumeMusic();
         }
     }
-    astSprite_t *tileset = &ast_sprites[AST_SPR_TILESET];
-    SDL_SetTextureColorMod( tileset->atlas->texture, 255, 255, 255 );
-    SDL_SetTextureAlphaMod( tileset->atlas->texture, 255 );
-    SDL_SetTextureBlendMode( tileset->atlas->texture, SDL_BLENDMODE_BLEND );
     v2_t origin = v2Scale( R_GetWindowSize(), 0.5 );
     v2_t toMouse = v2Sub( I_GetMousePositionV(), origin );
     v2_t direction = v2Norm( toMouse );
