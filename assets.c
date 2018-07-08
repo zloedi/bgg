@@ -205,6 +205,7 @@ void AST_Init( void ) {
     ast_wavThunder = AST_LoadSample( "thunder.ogg" );
     ast_wavGunshot = AST_LoadSample( "gunshot.ogg" );
     ast_wavCasingFallThick = AST_LoadSample( "casing_falling_thick.ogg" );
+    Mix_VolumeChunk( ast_wavCasingFallThick, MIX_MAX_VOLUME / 4 );
 }
 
 void AST_Frame( void ) {

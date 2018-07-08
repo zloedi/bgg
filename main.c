@@ -209,6 +209,7 @@ static void X_RegisterVars_f( void ) {
 
 static void X_Init_f( void ) {
     AST_Init();
+    WLD_Init();
     for ( int i = 0; i < CT_NUM_TYPES; i++ ) {
         x_compBins[i] = HunkAlloc( HUNK_SIZE );
     }

@@ -1,3 +1,35 @@
+IN PROGRESS
+
+Background/Terrain to show movement (no obstacles).
+    . Noise map asset.
+    Implement camera zoom in/out.
+    Background made with nice noise using tiles.
+    Backround moves.
+
+Hero moves.
+    Draw the hero.
+        Draw framed circle with the @ symbol inside.
+            * Disk bitmap.Circle bitmap. 
+                * No need to keep bitmap for the atlas after packing of all sprites?
+                    * Since all assets (even the procedural) are created on a single event, we don't need to keep bitmaps?
+                    * Try to implement support for 8bit texture.
+                        * SDL opengl renderer/texture supports only 32bpp and 16bpp luma alpha.
+                * Bake all static parts of the hero in a single rgb bitmap?
+                    * Put the ascii table and all other stuff in a single texture (atlas).
+                    * No valid reasons if all is one dip.
+                * Allocate all procedural sprites in the atlas?
+                * Generate actual pixels directly in the atlas?
+            Implement hierarchy of transform and use it to setup the character visuals.
+        Draw a marker showing the direction.
+    Use keys to move the hero.
+        Hero always locked at center of screen.
+    Sound for steps.
+    [OPTIONAL]Leave footsteps, traced by zombies?
+Do lightning visual effect using color mod.
+    Support for multiple colors combined to get final color?
+
+TODO
+
 == CORE ==
 
 Survival play mode: player moves and shoots infinite number of hostile zombies with a gun for score. 
@@ -77,41 +109,13 @@ Remotely powered with cables machines.
 Zombies clump together, basically ignoring eachother, charge at last step.
 Humans stay apart, try not to block eachother's paths.
 
-------------------------------------------------------------------------------------------------------------------
-
-IN PROGRESS
-    * Do rain ambient sound and thunder.
-        * Cleanup sdl mixer.
-    Hero moves.
-        Draw the hero.
-            Draw framed circle with the @ symbol inside.
-                * Disk bitmap.Circle bitmap. 
-                    * No need to keep bitmap for the atlas after packing of all sprites?
-                        * Since all assets (even the procedural) are created on a single event, we don't need to keep bitmaps?
-                        * Try to implement support for 8bit texture.
-                            * SDL opengl renderer/texture supports only 32bpp and 16bpp luma alpha.
-                    * Bake all static parts of the hero in a single rgb bitmap?
-                        * Put the ascii table and all other stuff in a single texture (atlas).
-                        * No valid reasons if all is one dip.
-                    * Allocate all procedural sprites in the atlas?
-                    * Generate actual pixels directly in the atlas?
-                Implement hierarchy of transform and use it to setup the character visuals.
-            Draw a marker showing the direction.
-        Background/Terrain to show movement (no obstacles).
-            Noise map asset.
-            Implement camera zoom in/out.
-            Background made with nice noise using tiles.
-            Backround moves.
-        Use keys to move the hero.
-            Hero always locked at center of screen.
-        Sound for steps.
-        [OPTIONAL]Leave footsteps, traced by zombies?
-    Do lightning visual effect using color mod.
-        Support for multiple colors combined to get final color?
-
 DONE
 
 Wed, Oct  4, 2017 20:03:08
+
+* Do rain ambient sound and thunder.
+    * Cleanup sdl mixer.
+
     Sound support in the engine.
         * Build and embed SDL_Mixer
         * Load samples.
